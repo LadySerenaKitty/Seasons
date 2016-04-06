@@ -12,5 +12,9 @@
             {
                 "id" : "ClimateConditions",
                 "minVersion" : "0.1.0"
+            },
+            {
+                "id" : "Calendar",
+                "minVersion" : "0.0.1"
             }]
 }

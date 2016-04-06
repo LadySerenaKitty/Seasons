@@ -18,6 +18,7 @@ package org.terasology.seasons;
 import com.google.common.base.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.calendar.CalendarSystem;
 import org.terasology.climateConditions.ClimateConditionsSystem;
 import org.terasology.climateConditions.ConditionModifier;
 import org.terasology.entitySystem.entity.EntityManager;
@@ -37,8 +38,6 @@ import org.terasology.utilities.OrdinalIndicator;
 
 /**
  * Handles the passing of seasons.
- *
- * @author DizzyDragon.
  */
 @RegisterSystem
 @Share(value = SeasonSystem.class)
@@ -54,6 +53,9 @@ public class SeasonSystem extends BaseComponentSystem {
 
     @In
     private WorldProvider world;
+
+    @In
+    private CalendarSystem calendarSystem;
 
     private WorldTime worldTime;
     private double lastDay;
