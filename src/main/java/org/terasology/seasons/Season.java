@@ -17,8 +17,6 @@ package org.terasology.seasons;
 
 /**
  * Enumeration of the seasons.
- *
- * @author DizzyDragon.
  */
 public enum Season {
     SPRING("spring", 6),
@@ -35,7 +33,7 @@ public enum Season {
     private final int lengthInDays;
     private int firstDay;
 
-    private Season(String name, int lengthInDays) {
+    Season(String name, int lengthInDays) {
         if (lengthInDays < 0) {
             throw new IllegalArgumentException("Length of a season must be >= 0");
         }

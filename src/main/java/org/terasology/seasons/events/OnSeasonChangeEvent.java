@@ -20,8 +20,6 @@ import org.terasology.seasons.Season;
 
 /**
  * Event to trigger when the season changes.
- *
- * @author DizzyDragon.
  */
 public class OnSeasonChangeEvent implements Event {
 
