@@ -19,6 +19,8 @@ import com.google.common.base.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.calendar.CalendarSystem;
+import org.terasology.calendar.components.SeasonComponent;
+import org.terasology.calendar.events.OnCalendarEvent;
 import org.terasology.climateConditions.ClimateConditionsSystem;
 import org.terasology.climateConditions.ConditionModifier;
 import org.terasology.entitySystem.entity.EntityManager;
@@ -29,7 +31,6 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.math.TeraMath;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
-import org.terasology.seasons.events.OnSeasonChangeEvent;
 import org.terasology.world.WorldComponent;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.sun.OnMidnightEvent;
@@ -126,48 +127,42 @@ public class SeasonSystem extends BaseComponentSystem {
 
     @ReceiveEvent(components = WorldComponent.class)
     public void onMidnight(OnMidnightEvent event, EntityRef entity) {
+        dayCode();
+    }
+
+    @ReceiveEvent(components = WorldComponent.class)
+    public void onCalendarEvent(OnCalendarEvent event, EntityRef entity) {
+        dayCode();
+    }
+
+    private void dayCode() {
         lastDay = currentDay;
         currentDay = worldTime.getDays();
 
-        Season s = Season.onDay(currentDay);
-        int d = Season.dayOfSeason(currentDay);
-
         if (logger.isInfoEnabled()) {
-            logger.info(String.format("%s day of %s", OrdinalIndicator.addedTo(d), s.displayName()));
-        }
-
-        if (seasonChanged()) {
-            broadcastSeasonChangeEvent();
+            logger.info(getSeasonDayDescription());
         }
     }
 
     public String getSeasonDayDescription() {
-        float days = worldTime.getDays() + TIME_SHIFT;
-        Season s = Season.onDay(days);
-        int d = Season.dayOfSeason(days);
+        SeasonComponent s = calendarSystem.getCurrentSeason();
+        int d = calendarSystem.currentSeasonDay();
 
-        return String.format("%s day of %s", OrdinalIndicator.addedTo(d + 1), s.displayName());
+        return String.format("%s day of %s", OrdinalIndicator.addedTo(d + 1), s.getName());
     }
 
     private float getTemperature(float baseValue) {
-        float days = worldTime.getDays() + TIME_SHIFT;
-        float years = days / Season.YEAR_LENGTH_IN_DAYS;
-        return baseValue + yearlyTemperatureModifier.apply(years);
+        float days = calendarSystem.getMath().getCurrentYearDay() / calendarSystem.getDaysPerYear();
+        return baseValue + yearlyTemperatureModifier.apply(days);
     }
 
     private float getHumidity(float baseValue) {
-        float days = worldTime.getDays() + TIME_SHIFT;
-        float years = days / Season.YEAR_LENGTH_IN_DAYS;
-        return TeraMath.clamp(baseValue + yearlyHumidityModifier.apply(years), 0, 1);
+        float days = calendarSystem.getMath().getCurrentYearDay() / calendarSystem.getDaysPerYear();
+        return TeraMath.clamp(baseValue + yearlyHumidityModifier.apply(days), 0, 1);
     }
 
     private boolean seasonChanged() {
         return Season.onDay(lastDay) != Season.onDay(currentDay);
-    }
-
-    private void broadcastSeasonChangeEvent() {
-        OnSeasonChangeEvent event = new OnSeasonChangeEvent(Season.onDay(lastDay), Season.onDay(currentDay));
-        getWorldEntity().send(event);
     }
 
     private EntityRef getWorldEntity() {
